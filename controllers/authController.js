@@ -96,9 +96,7 @@ export const UpdateStatusBeeper = (req, res) => __awaiter(void 0, void 0, void 0
                 break;
             case BeeperStatus.shipped:
                 beeperFind.status = BeeperStatus.deployed;
-                break;
-            case BeeperStatus.deployed:
-                beeperFind.status = BeeperStatus.detonated;
+                // מקבל מיקום מקומי ומפעיל טיימר של 10 שניות ומשנה את הסטטוס ל התפוצץ
                 beeperFind.detonated_at = new Date();
                 break;
             default:
