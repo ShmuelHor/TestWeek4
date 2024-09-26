@@ -2,9 +2,7 @@ import { Request,Response } from "express";
 import {Beeper,BeeperStatus} from '../models/types.js';
 import {v4 as uuidv4} from 'uuid'
 import { writeUserToJsonFile,readFromJsonFile,UpdateFile,updateUser} from "../DAL/jsonUser.js";
-import {IsLocationNormal} from "../service/service.js";
-import axios from 'axios';
-import { promises } from "dns";
+import {updateStatusBeeper} from "../service/service.js";
 
 export const CreateBeeper = (req:Request,res:Response)=>{
     try{
@@ -22,7 +20,6 @@ export const CreateBeeper = (req:Request,res:Response)=>{
         res.status(500).send({ message: e.message });
     }
 }
-
 
 export const GetAllBeepers = async (req:Request,res:Response)=>{
     try {
@@ -75,7 +72,7 @@ export const deleteBeeper = async (req:Request,res:Response)=>{
     }
 
     beepers.splice(beeperIndex,1)
-    UpdateFile(beepers)
+    await UpdateFile(beepers)
     res.status(200).send({message:"beeper deleted"});
     }
     catch(e: any) {
@@ -90,38 +87,8 @@ export const UpdateStatusBeeper = async (req:Request,res:Response)=>{
     if (!beeperFind) {
         throw new Error("beeper not found")
     }
-    switch (beeperFind.status) {
-        case BeeperStatus.manufactured:
-            beeperFind.status = BeeperStatus.assembled;
-            break;
-        case BeeperStatus.assembled:
-            beeperFind.status = BeeperStatus.shipped;
-            break;
-        case BeeperStatus.shipped:
-            beeperFind.status = BeeperStatus.deployed;
-            // מקבל מיקום מקומי ומפעיל טיימר של 10 שניות ומשנה את הסטטוס ל התפוצץ
-            if(!IsLocationNormal(req.body.latitude,req.body.longitude)){
-                throw new Error("Improper location");
-            }
-            else{
-                beeperFind.latitude = req.body.latitude;
-                beeperFind.longitude = req.body.longitude;
-                updateUser(beeperFind);
-                // 10 שניות
-               setTimeout(() => {
-                    console.log("ddddddddd");
-                    beeperFind.status = BeeperStatus.detonated;
-                    beeperFind.detonated_at = new Date();
-                    beeperFind.name = "dead";
-                    updateUser(beeperFind);
-
-                },10000)
-            }
-            break;
-            default:
-                throw new Error("invalid status");
-            }
-    updateUser(beeperFind);
+    const Beeper:Beeper = await updateStatusBeeper(beeperFind,req.body.latitude,req.body.longitude);
+    await updateUser(Beeper );
     res.status(200).send({message:`status updated ${beeperFind.status}`});
     }
     catch(e: any) {

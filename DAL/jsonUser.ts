@@ -20,7 +20,7 @@ export const readFromJsonFile = async()=>{
 export const updateUser = async (beeper: Beeper) => {
   try {
     const users: Beeper[] = await jsonfile.readFile('./data/db.json');
-    const index = users.findIndex((u) => u.id === beeper.id);
+    const index:number = users.findIndex((u) => u.id === beeper.id);
     if (index !== -1) {
       users[index] = beeper;
       await jsonfile.writeFile('./data/db.json', users);
