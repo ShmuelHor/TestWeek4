@@ -88,8 +88,8 @@ export const UpdateStatusBeeper = async (req:Request,res:Response)=>{
         throw new Error("beeper not found")
     }
     const Beeper:Beeper = await updateStatusBeeper(beeperFind,req.body.latitude,req.body.longitude);
-    await updateUser(Beeper );
     res.status(200).send({message:`status updated ${beeperFind.status}`});
+    await updateUser(Beeper );
     }
     catch(e: any) {
         res.status(500).send({ message: e.message });

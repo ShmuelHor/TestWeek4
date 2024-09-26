@@ -8,6 +8,6 @@ const app:Application = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/',authRouter);
+app.use('/api',authRouter);
 
 app.listen(PORT,()=>{console.log("server is on");})

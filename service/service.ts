@@ -6,7 +6,7 @@ export function IsLocationNormal(latitudeBody:Number,longitudeBody:Number):boole
 {
     const indexLongitude:number = Longitude.findIndex((u) =>u == longitudeBody );
     const indexLatitude:number = Latitude.findIndex((u) =>u == latitudeBody );
-    if (indexLongitude == -1 || indexLatitude == -1) {
+    if (indexLongitude == -1 && indexLatitude == -1) {
        return false
     }
     return indexLongitude == indexLatitude;

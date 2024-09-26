@@ -89,8 +89,8 @@ export const UpdateStatusBeeper = (req, res) => __awaiter(void 0, void 0, void 0
             throw new Error("beeper not found");
         }
         const Beeper = yield updateStatusBeeper(beeperFind, req.body.latitude, req.body.longitude);
-        yield updateUser(Beeper);
         res.status(200).send({ message: `status updated ${beeperFind.status}` });
+        yield updateUser(Beeper);
     }
     catch (e) {
         res.status(500).send({ message: e.message });
