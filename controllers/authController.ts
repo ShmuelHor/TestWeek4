@@ -2,6 +2,7 @@ import { Request,Response } from "express";
 import {Beeper,BeeperStatus} from '../models/types.js';
 import {v4 as uuidv4} from 'uuid'
 import { writeUserToJsonFile,readFromJsonFile,UpdateFile,updateUser} from "../DAL/jsonUser.js";
+import {IsLocationNormal} from "../service/service.js";
 import axios from 'axios';
 import { promises } from "dns";
 
@@ -99,13 +100,29 @@ export const UpdateStatusBeeper = async (req:Request,res:Response)=>{
         case BeeperStatus.shipped:
             beeperFind.status = BeeperStatus.deployed;
             // מקבל מיקום מקומי ומפעיל טיימר של 10 שניות ומשנה את הסטטוס ל התפוצץ
-            beeperFind.detonated_at = new Date();
+            if(!IsLocationNormal(req.body.latitude,req.body.longitude)){
+                throw new Error("Improper location");
+            }
+            else{
+                beeperFind.latitude = req.body.latitude;
+                beeperFind.longitude = req.body.longitude;
+                updateUser(beeperFind);
+                // 10 שניות
+               setTimeout(() => {
+                    console.log("ddddddddd");
+                    beeperFind.status = BeeperStatus.detonated;
+                    beeperFind.detonated_at = new Date();
+                    beeperFind.name = "dead";
+                    updateUser(beeperFind);
+
+                },10000)
+            }
             break;
-        default:
-            throw new Error("invalid status");
-    }
+            default:
+                throw new Error("invalid status");
+            }
     updateUser(beeperFind);
-    res.status(200).send({message:"status updated"});
+    res.status(200).send({message:`status updated ${beeperFind.status}`});
     }
     catch(e: any) {
         res.status(500).send({ message: e.message });
